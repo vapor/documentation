@@ -9,6 +9,28 @@ sudo apt-get update
 sudo apt-get install supervisor
 ```
 
+Once installed, Supervisor is only configured to run as the `root` user. It is considered a good practice to not your services as `root`. If you created a `vapor` user earlier, you can add it to a group that can run Supervisor thusly:
+
+```sh
+groupadd supervisor
+usermod -a vapor -G supervisor
+```
+
+Log out, log back in, and edit the the supervisord configuration file (`/etc/supervisor/supervisor.conf`) `unix_http_server` section. These changes will grant the newly created group `supervisor` access to the service.
+
+```sh
+[unix_http_server]
+file=/var/run/supervisor.sock ; (the path to the socket file)
+chmod=0770 ; socket file mode (default 0700)
+chown=root:supervisor
+```
+
+Finally, restart Supervisor:
+
+```sh
+supervisorctl reload
+```
+
 ## Configure
 
 Each Vapor app on your server should have its own configuration file. For an example `Hello` project, the configuration file would be located at `/etc/supervisor/conf.d/hello.conf`
